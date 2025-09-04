@@ -1,22 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calm Puffy Breathing</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
+
+        :root {
+            --primary-blue: #1e90ff;
+            --dark-blue: #0d3b66;
+            --accent-yellow: #ffc300;
+            --dark-yellow: #ffa800;
+            --text-yellow: #3d1b00;
+        }
 
         body {
             font-family: 'Fredoka One', cursive;
             text-align: center;
             margin: 0;
             padding: 0;
-            background: #1e90ff; /* Deep sea blue */
+            background: linear-gradient(135deg, #1e90ff, #00BFFF, #4682B4);
+            background-size: 400% 400%;
+            animation: gradientWave 20s ease infinite;
             color: white;
             overflow: hidden;
             user-select: none;
         }
+
+        @keyframes gradientWave {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
         .page {
             display: none;
             height: 100vh;
@@ -28,52 +54,61 @@
             position: relative;
             padding: 20px;
         }
+
         .page.active {
             display: flex;
         }
-        .welcome-box, .game-over-box {
-            background: rgba(255, 255, 255, 0.2);
+
+        .welcome-box,
+        .game-over-box {
+            background: rgba(255, 255, 255, 0.15);
             padding: 40px;
             border-radius: 30px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-            border: 5px solid white;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            border: 3px solid rgba(255, 255, 255, 0.5);
             max-width: 600px;
+            position: relative;
         }
+
         h1 {
-            /* FONT SIZE INCREASED */
-            font-size: 4em;
-            text-shadow: 4px 4px 0px #0d3b66;
+            font-size: 3.8em;
+            text-shadow: 3px 3px 0px var(--dark-blue);
             margin-bottom: 20px;
         }
+
         p {
             font-size: 1.5em;
         }
+
         button {
             font-family: 'Fredoka One', cursive;
-            background: #ffc300;
-            color: #3d1b00;
+            background: var(--accent-yellow);
+            color: var(--text-yellow);
             padding: 20px 40px;
             border: none;
             border-radius: 20px;
             cursor: pointer;
             font-size: 24px;
-            border-bottom: 8px solid #ffa800;
+            border-bottom: 8px solid var(--dark-yellow);
             transition: all 0.1s ease-in-out;
             margin-top: 20px;
         }
+
+        button:hover {
+            filter: brightness(1.1);
+        }
+
         button:active {
             transform: translateY(4px);
             border-bottom-width: 4px;
         }
-        #game-screen {
-            position: relative;
-        }
+
         #puffy {
-            /* PUFFY SIZE INCREASED */
             width: 300px;
-            /* The transition makes the puffing smooth */
             transition: transform 3s ease-in-out;
+            margin-bottom: 20px;
         }
+
         #game-ui {
             position: absolute;
             top: 20px;
@@ -81,24 +116,188 @@
             right: 20px;
             display: flex;
             justify-content: space-between;
-             /* UI FONT SIZE INCREASED */
-            font-size: 2.5em;
-            text-shadow: 3px 3px 0px #0d3b66;
+            align-items: center;
+            font-size: 2em;
+            text-shadow: 2px 2px 0px var(--dark-blue);
         }
+
+        .ui-cluster {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        /* SVG Icon Buttons */
+        .icon-button {
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.2s;
+        }
+
+        .icon-button:hover {
+            transform: scale(1.1);
+        }
+
+        .icon-button svg {
+            width: 100%;
+            height: 100%;
+            fill: white;
+            filter: drop-shadow(2px 2px 0px var(--dark-blue));
+        }
+
         #instruction {
-             /* INSTRUCTION FONT SIZE INCREASED */
             font-size: 3.5em;
-            margin-top: 30px;
-            text-shadow: 4px 4px 0px #0d3b66;
-            height: 120px; /* Reserve space to prevent layout shifts */
+            text-shadow: 3px 3px 0px var(--dark-blue);
+            height: 90px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
-        /* Bubble animation for background */
+
+        #bubble-timer {
+            width: 80px;
+            height: 80px;
+            border: 4px solid rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.1);
+            transition: opacity 0.5s;
+            opacity: 0;
+        }
+
+        #bubble-fill {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            height: 0;
+            z-index: 1;
+        }
+
+        #bubble-text {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.5em;
+            color: var(--dark-blue);
+            z-index: 2;
+        }
+
+        .filling {
+            animation-name: fill-bubble;
+            animation-timing-function: linear;
+            animation-fill-mode: forwards;
+        }
+
+        .emptying {
+            animation-name: empty-bubble;
+            animation-timing-function: linear;
+            animation-fill-mode: forwards;
+        }
+
+        @keyframes fill-bubble {
+            from {
+                height: 0%;
+            }
+
+            to {
+                height: 100%;
+            }
+        }
+
+        @keyframes empty-bubble {
+            from {
+                height: 100%;
+            }
+
+            to {
+                height: 0%;
+            }
+        }
+
+        #settings-icon {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.3s, background-color 0.3s;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        #settings-icon:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1) rotate(20deg);
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            z-index: 10;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        #settings-modal {
+            position: absolute;
+            background-color: var(--primary-blue);
+            border: 4px solid white;
+            padding: 30px;
+            border-radius: 20px;
+            width: 80%;
+            max-width: 500px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+            color: white;
+            text-shadow: 2px 2px 0px var(--dark-blue);
+        }
+
+        #settings-modal h2 {
+            font-size: 2em;
+            margin-top: 0;
+        }
+
+        .level-button {
+            display: block;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .level-button.active {
+            background: #fdfd96;
+            border-bottom-color: #e2e25e;
+        }
+
         .bubble {
             position: absolute;
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.25);
             border-radius: 50%;
             pointer-events: none;
             animation: rise 15s infinite linear;
@@ -106,208 +305,338 @@
         }
 
         @keyframes rise {
-            from { bottom: -150px; transform: translateX(0); }
-            to { bottom: 110vh; transform: translateX(var(--x-end)); }
+            from {
+                bottom: -150px;
+                transform: translateX(0);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 1;
+            }
+
+            90% {
+                opacity: 1;
+            }
+
+            to {
+                bottom: 110vh;
+                transform: translateX(var(--x-end));
+                opacity: 0;
+            }
         }
-        
-        /* --- Mobile Responsiveness --- */
+
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            overflow: hidden;
+        }
+
         @media (max-width: 768px) {
             h1 {
                 font-size: 2.5em;
             }
+
             p {
                 font-size: 1.2em;
             }
+
             #instruction {
                 font-size: 1.8em;
-                height: 80px;
+                height: 60px;
             }
+
             #puffy {
-                /* Size for smaller phones */
                 width: 220px;
+                margin-bottom: 10px;
             }
+
+            #bubble-timer {
+                width: 60px;
+                height: 60px;
+            }
+
+            #bubble-text {
+                font-size: 2em;
+            }
+
             #game-ui {
                 font-size: 1.5em;
             }
+
+            .icon-button {
+                width: 28px;
+                height: 28px;
+            }
+
             button {
                 padding: 15px 30px;
                 font-size: 20px;
             }
-             .welcome-box, .game-over-box {
-                padding: 25px;
-             }
-        }
 
+            .welcome-box,
+            .game-over-box {
+                padding: 25px;
+            }
+
+            #settings-icon {
+                width: 40px;
+                height: 40px;
+                top: 15px;
+                right: 15px;
+                padding: 8px;
+            }
+        }
     </style>
 </head>
+
 <body>
 
-<!-- Audio element for background music -->
-<audio id="background-music" loop>
-    <!-- IMPORTANT: Replace 'Sothingsound.mp3' with the path to your audio file -->
-    <source src="Sothingsound.mp3" type="audio/mpeg">
-    Your browser does not support the audio element.
-</audio>
+    <div id="preloader"><img src="fish.png" alt="preloading"></div>
+    <audio id="background-music" loop>
+        <source src="mindful-breathing.mp3" type="audio/mpeg">
+    </audio>
 
-
-<!-- Page 1: Welcome -->
-<div id="page1" class="page active">
-    <div class="welcome-box">
-        <h1>Puffy's Breathing Adventure</h1>
-        <img id="welcome-puffy" src="fish.png" alt="Puffy the Pufferfish" style="width:150px; margin-bottom:20px;">
-        <p>Let's relax with Puffy! Watch him and breathe along to feel calm and happy.</p>
-        <button onclick="startGame()">Let's Breathe!</button>
+    <!-- Page 1: Welcome -->
+    <div id="page1" class="page active">
+        <div class="welcome-box">
+            <div id="settings-icon">
+                <svg viewBox="0 0 24 24">
+                    <path fill="currentColor"
+                        d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z" />
+                </svg>
+            </div>
+            <h1>Puffy's Breathing Adventure</h1>
+            <img src="fish.png" alt="Puffy the Pufferfish" style="width:150px; margin-bottom:20px;">
+            <p>Let's take some deep breaths with Puffy to feel calm and happy!</p>
+            <button onclick="startGame()">Let's Breathe!</button>
+        </div>
     </div>
-</div>
 
-<!-- Page 2: Game -->
-<div id="page2" class="page">
-    <div id="game-ui">
-        <div id="cycles">Cycles: 0</div>
-        <div id="timer">04:00</div>
+    <!-- Page 2: Game -->
+    <div id="page2" class="page">
+        <div id="game-ui">
+            <div class="ui-cluster">
+                <div id="back-button" class="icon-button" onclick="goHome()">
+                    <svg viewBox="0 0 24 24">
+                        <path fill="currentColor" d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
+                    </svg>
+                </div>
+                <div id="breaths">Breaths: 0</div>
+            </div>
+            <div class="ui-cluster">
+                <div id="timer">04:00</div>
+                <div id="mute-button" class="icon-button" onclick="toggleMute()">
+                    <svg id="unmute-icon" viewBox="0 0 24 24">
+                        <path fill="currentColor"
+                            d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" />
+                    </svg>
+                    <svg id="mute-icon" style="display: none;" viewBox="0 0 24 24">
+                        <path fill="currentColor"
+                            d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L7 9H3v6h4l5 5v-6.73l-2-2z" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+        <img id="puffy" src="fish.png" alt="Puffy the Pufferfish">
+        <h2 id="instruction">Get Ready...</h2>
+        <div id="bubble-timer">
+            <div id="bubble-fill"></div>
+            <div id="bubble-text"></div>
+        </div>
     </div>
-    <img id="puffy" src="fish.png" alt="Puffy the Pufferfish">
-    <h2 id="instruction">Get Ready...</h2>
-</div>
 
-<!-- Page 3: Game Over -->
-<div id="page3" class="page">
-    <div class="game-over-box">
-        <h1>Amazing Job!</h1>
-        <!-- Game over image size increased -->
-        <img src="fish.png" alt="Puffed up Puffy" style="width: 250px; margin-bottom: 20px;">
-        <p>You completed</p>
-        <p id="final-cycles" style="font-size: 2.5em; color:#ffc300; text-shadow: 3px 3px 0 #0d3b66;">0 Cycles!</p>
-        <button onclick="startGame()">Breathe Again!</button>
+    <!-- Page 3: Game Over -->
+    <div id="page3" class="page">
+        <div class="game-over-box">
+            <h1>Super Job!</h1>
+            <img src="fish.png" alt="Happy Puffy" style="transform: scale(1.5); width: 200px; margin-bottom: 20px;">
+            <p>You took</p>
+            <p id="final-breaths"
+                style="font-size: 2.5em; color:var(--accent-yellow); text-shadow: 3px 3px 0 var(--dark-blue);">0 Deep
+                Breaths!</p>
+            <button onclick="startGame()">Play Again!</button>
+        </div>
     </div>
-</div>
 
-<script>
-    const pages = {
-        welcome: document.getElementById('page1'),
-        game: document.getElementById('page2'),
-        gameOver: document.getElementById('page3')
-    };
-    const puffyImg = document.getElementById('puffy');
-    const welcomePuffyImg = document.getElementById('welcome-puffy');
-    const cyclesDisplay = document.getElementById('cycles');
-    const timerDisplay = document.getElementById('timer');
-    const instructionDisplay = document.getElementById('instruction');
-    const finalCyclesDisplay = document.getElementById('final-cycles');
-    const backgroundMusic = document.getElementById('background-music');
+    <!-- SETTINGS MODAL -->
+    <div id="modal-overlay" class="modal-overlay">
+        <div id="settings-modal">
+            <h2>Choose a Breathing Level</h2>
+            <button id="level-easy" class="level-button active" onclick="setPattern('easy')">Level 1: Easy Puff</button>
+            <button id="level-medium" class="level-button" onclick="setPattern('medium')">Level 2: Steady Puff</button>
+            <button id="level-calm" class="level-button" onclick="setPattern('calm')">Level 3: Deep Calm</button>
+        </div>
+    </div>
 
-    // --- Image URLs ---
-    // Both URLs point to the same image, as requested.
-    const calmPuffyURL =   'fish.png';
-    const puffedPuffyURL = 'fish.png';
-    // -------------------------------------------------------------
-    
-    // TIMER INCREASED TO 4 MINUTES (240 seconds)
-    let timer = 240;
-    let cycles = 0;
-    let gameTimerInterval, gameLoopTimeout;
+    <script>
+        // --- ELEMENT REFERENCES ---
+        const pages = { welcome: document.getElementById('page1'), game: document.getElementById('page2'), gameOver: document.getElementById('page3') };
+        const puffyImg = document.getElementById('puffy');
+        const breathsDisplay = document.getElementById('breaths');
+        const timerDisplay = document.getElementById('timer');
+        const instructionDisplay = document.getElementById('instruction');
+        const finalBreathsDisplay = document.getElementById('final-breaths');
+        const backgroundMusic = document.getElementById('background-music');
+        const bubbleTimer = document.getElementById('bubble-timer');
+        const bubbleFill = document.getElementById('bubble-fill');
+        const bubbleText = document.getElementById('bubble-text');
+        const settingsIcon = document.getElementById('settings-icon');
+        const modalOverlay = document.getElementById('modal-overlay');
+        const settingsModal = document.getElementById('settings-modal');
+        const unmuteIcon = document.getElementById('unmute-icon');
+        const muteIcon = document.getElementById('mute-icon');
 
-    // --- Functions ---
-    function switchPage(pageName) {
-        Object.values(pages).forEach(p => p.classList.remove('active'));
-        pages[pageName].classList.add('active');
-    }
+        // --- GAME SETTINGS ---
+        const breathingPatterns = { easy: { inhale: 4, hold: 2, exhale: 4 }, medium: { inhale: 4, hold: 4, exhale: 4 }, calm: { inhale: 4, hold: 4, exhale: 6 } };
+        let currentPattern = breathingPatterns.easy;
+        const GAME_DURATION = 240;
+        let timer = GAME_DURATION;
+        let breaths = 0;
+        let isMuted = false;
+        let gameTimerInterval, gameLoopTimeout, countdownInterval;
 
-    function startGame() {
-        // Play music on user interaction
-        backgroundMusic.volume = 0.3; // Set a pleasant volume
-        backgroundMusic.play().catch(error => {
-            console.log("Audio play failed, requires user interaction:", error);
+        // --- SETTINGS LOGIC ---
+        settingsIcon.addEventListener('click', openSettings);
+        modalOverlay.addEventListener('click', (event) => {
+            if (event.target === modalOverlay) closeSettings();
         });
+        function openSettings() { modalOverlay.style.display = 'block'; setTimeout(() => { modalOverlay.style.opacity = '1'; settingsModal.style.transform = 'scale(1)'; }, 10); }
+        function closeSettings() { modalOverlay.style.opacity = '0'; settingsModal.style.transform = 'scale(0.9)'; setTimeout(() => { modalOverlay.style.display = 'none'; }, 300); }
+        function setPattern(level) { currentPattern = breathingPatterns[level]; document.querySelectorAll('.level-button').forEach(btn => btn.classList.remove('active')); document.getElementById(`level-${level}`).classList.add('active'); setTimeout(closeSettings, 200); }
 
-        // Reset state
-        cycles = 0;
-        // TIMER RESET TO 4 MINUTES
-        timer = 240; 
-        cyclesDisplay.textContent = `Cycles: 0`;
-        // TIMER DISPLAY UPDATED TO 04:00
-        timerDisplay.textContent = '04:00';
-        instructionDisplay.textContent = 'Get Ready...';
-        puffyImg.src = calmPuffyURL;
-        welcomePuffyImg.src = calmPuffyURL; 
-        puffyImg.style.transform = 'scale(1)';
+        // --- AUDIO FUNCTIONS ---
+        function audioFadeIn(audioElement) { if (isMuted) return; audioElement.volume = 0; audioElement.play().catch(e => console.log("Audio play failed: " + e)); let fadeVolume = 0; const fadeInterval = setInterval(() => { fadeVolume = Math.min(fadeVolume + 0.1, 0.5); audioElement.volume = fadeVolume; if (fadeVolume >= 0.5) clearInterval(fadeInterval); }, 100); }
+        function audioFadeOut(audioElement) { if (audioElement.paused) return; let fadeVolume = audioElement.volume; const fadeInterval = setInterval(() => { fadeVolume = Math.max(fadeVolume - 0.1, 0); audioElement.volume = fadeVolume; if (fadeVolume <= 0) { clearInterval(fadeInterval); audioElement.pause(); } }, 100); }
 
-        switchPage('game');
-
-        clearInterval(gameTimerInterval);
-        clearTimeout(gameLoopTimeout);
-
-        // Start countdowns and loops
-        gameTimerInterval = setInterval(updateTimer, 1000);
-        setTimeout(gameLoop, 2000); 
-    }
-
-    function gameOver() {
-        clearInterval(gameTimerInterval);
-        clearTimeout(gameLoopTimeout);
-        finalCyclesDisplay.textContent = `${cycles} Cycles!`;
-        switchPage('gameOver');
-    }
-
-    function updateTimer() {
-        if (timer > 0) {
-           timer--;
+        function toggleMute() {
+            isMuted = !isMuted;
+            muteIcon.style.display = isMuted ? 'block' : 'none';
+            unmuteIcon.style.display = isMuted ? 'none' : 'block';
+            if (isMuted) { backgroundMusic.volume = 0; }
+            else if (!backgroundMusic.paused) { backgroundMusic.volume = 0.5; }
         }
-        const minutes = Math.floor(timer / 60);
-        const seconds = timer % 60;
-        timerDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-        if (timer <= 0) {
-            gameOver();
-        }
-    }
 
-    function gameLoop() {
-        // --- 1. Breathe In (4 seconds) ---
-        instructionDisplay.textContent = 'Breathe In...';
-        puffyImg.src = puffedPuffyURL; 
-        puffyImg.style.transform = 'scale(1.5)';
+        // --- GAME STATE FUNCTIONS ---
+        function switchPage(pageName) { Object.values(pages).forEach(p => p.classList.remove('active')); pages[pageName].classList.add('active'); }
+        function goHome() { clearTimeout(gameLoopTimeout); clearInterval(gameTimerInterval); clearInterval(countdownInterval); audioFadeOut(backgroundMusic); switchPage('welcome'); }
 
-        // --- 2. Hold (4 seconds) ---
-        gameLoopTimeout = setTimeout(() => {
-            instructionDisplay.textContent = '...Hold...';
-        }, 4000);
-
-        // --- 3. Breathe Out (4 seconds) ---
-        gameLoopTimeout = setTimeout(() => {
-            instructionDisplay.textContent = 'Breathe Out...';
-            puffyImg.src = calmPuffyURL; 
+        function startGame() {
+            breaths = 0;
+            timer = GAME_DURATION;
+            breathsDisplay.textContent = `Breaths: 0`;
+            timerDisplay.textContent = '04:00';
             puffyImg.style.transform = 'scale(1)';
-        }, 8000);
-
-        // --- 4. Rest & Repeat (4 seconds) ---
-        gameLoopTimeout = setTimeout(() => {
-            instructionDisplay.textContent = '...and Relax...';
-            cycles++;
-            cyclesDisplay.textContent = `Cycles: ${cycles}`;
-            // Repeat the loop only if time has not run out
-            if (timer > 0) gameLoop();
-        }, 12000);
-    }
-    
-    // Create decorative bubbles in the background
-    function createBubbles() {
-        if (document.querySelector('.bubble')) return;
-        const body = document.body;
-        for(let i = 0; i < 30; i++) { // More bubbles for a richer background
-            const bubble = document.createElement('div');
-            bubble.classList.add('bubble');
-            const size = Math.random() * 40 + 10 + 'px';
-            bubble.style.width = size;
-            bubble.style.height = size;
-            bubble.style.left = Math.random() * 100 + '%';
-            bubble.style.animationDuration = Math.random() * 10 + 8 + 's';
-            bubble.style.animationDelay = Math.random() * 5 + 's';
-            bubble.style.setProperty('--x-end', (Math.random() - 0.5) * 100 + 'px');
-            body.appendChild(bubble);
+            bubbleTimer.style.opacity = '0';
+            bubbleText.textContent = '';
+            bubbleFill.className = '';
+            bubbleFill.style.height = '0%';
+            switchPage('game');
+            audioFadeIn(backgroundMusic);
+            clearTimeout(gameLoopTimeout); clearInterval(gameTimerInterval); clearInterval(countdownInterval);
+            startGetReadyCountdown();
         }
-    }
 
-    createBubbles();
-</script>
+        function gameOver() {
+            clearTimeout(gameLoopTimeout); clearInterval(gameTimerInterval); clearInterval(countdownInterval);
+            finalBreathsDisplay.textContent = `${breaths} Deep Breaths!`;
+            bubbleTimer.style.opacity = '0';
+            switchPage('gameOver');
+            audioFadeOut(backgroundMusic);
+        }
+
+        // --- TIMERS AND LOOPS ---
+        function updateTimer() {
+            if (timer > 0) timer--;
+            const minutes = Math.floor(timer / 60); const seconds = timer % 60;
+            timerDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            if (timer <= 0) gameOver();
+        }
+
+        function startGetReadyCountdown() {
+            instructionDisplay.textContent = "Get Ready...";
+            let countdown = 3;
+            const countdownTimer = setTimeout(() => {
+                const getReadyInterval = setInterval(() => {
+                    if (countdown > 0) { instructionDisplay.textContent = countdown; countdown--; }
+                    else { clearInterval(getReadyInterval); bubbleTimer.style.opacity = '1'; gameTimerInterval = setInterval(updateTimer, 1000); gameLoop(); }
+                }, 1000);
+            }, 1000);
+        }
+
+        function startBubbleCountdown(duration) {
+            clearInterval(countdownInterval);
+            let count = duration;
+            if (count === 0) {
+                bubbleText.textContent = '';
+                return;
+            }
+            bubbleText.textContent = count;
+            countdownInterval = setInterval(() => {
+                count--;
+                if (count > 0) { bubbleText.textContent = count; }
+                else { bubbleText.textContent = ''; clearInterval(countdownInterval); }
+            }, 1000);
+        }
+
+        function gameLoop() {
+            if (timer <= 0) return;
+            const { inhale, hold, exhale } = currentPattern;
+            const inhaleMS = inhale * 1000;
+            const holdMS = hold * 1000;
+            const totalCycleMS = (inhale + hold + exhale) * 1000;
+
+            instructionDisplay.textContent = 'Breathe In...';
+            puffyImg.style.transform = 'scale(1.5)';
+            bubbleFill.style.animationDuration = `${inhale}s`;
+            bubbleFill.className = 'bubble-fill filling';
+            startBubbleCountdown(inhale);
+
+            gameLoopTimeout = setTimeout(() => {
+                if (timer <= 0) return;
+                instructionDisplay.textContent = 'Hold it!';
+                startBubbleCountdown(hold);
+            }, inhaleMS);
+
+            gameLoopTimeout = setTimeout(() => {
+                if (timer <= 0) return;
+                instructionDisplay.textContent = 'Breathe out slowly...';
+                puffyImg.style.transform = 'scale(1)';
+                bubbleFill.style.animationDuration = `${exhale}s`;
+                bubbleFill.className = 'bubble-fill emptying';
+                startBubbleCountdown(exhale);
+            }, inhaleMS + holdMS);
+
+            gameLoopTimeout = setTimeout(() => {
+                if (timer <= 0) return;
+                breaths++;
+                breathsDisplay.textContent = `Breaths: ${breaths}`;
+                gameLoop();
+            }, totalCycleMS);
+        }
+
+        // --- BACKGROUND BUBBLES ---
+        function createBubbles() {
+            if (document.querySelector('.bubble')) return;
+            const body = document.body;
+            for (let i = 0; i < 40; i++) {
+                const bubble = document.createElement('div');
+                bubble.classList.add('bubble');
+                const size = Math.random() * 40 + 10 + 'px';
+                bubble.style.width = size;
+                bubble.style.height = size;
+                bubble.style.left = Math.random() * 100 + '%';
+                bubble.style.animationDuration = Math.random() * 12 + 10 + 's';
+                bubble.style.animationDelay = Math.random() * 8 + 's';
+                bubble.style.setProperty('--x-end', (Math.random() - 0.5) * 150 + 'px');
+                body.appendChild(bubble);
+            }
+        }
+        createBubbles();
+    </script>
 </body>
+
 </html>
